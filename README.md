@@ -16,7 +16,10 @@ pytest -n 6               # parallel (pytest-xdist) — each node has 2 slots
 docker compose down -v
 ```
 
-Grid console: http://localhost:4444/ui · status JSON: http://localhost:4444/status
+Grid console: http://localhost:4444/ui/ (trailing slash matters — `index.js` is
+relative) · status JSON: http://localhost:4444/status
+
+![Grid console with chrome, firefox and edge nodes](docs/grid-console.png)
 
 ## Layout
 
