@@ -1,5 +1,5 @@
 # cross-browser-grid
-n[![CI](https://github.com/LSaiko/cross-browser-grid/actions/workflows/test.yml/badge.svg)](https://github.com/LSaiko/cross-browser-grid/actions/workflows/test.yml)
+[![CI](https://github.com/LSaiko/cross-browser-grid/actions/workflows/test.yml/badge.svg)](https://github.com/LSaiko/cross-browser-grid/actions/workflows/test.yml)
 
 Runs one pytest suite against Chrome **and** Firefox through a Selenium Grid
 started with Docker Compose. Target app: https://www.saucedemo.com.
