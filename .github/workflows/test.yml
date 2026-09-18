@@ -12,11 +12,11 @@ jobs:
           python-version: "3.12"
       - run: pip install -r requirements.txt
       - run: docker compose up -d
-      - name: Wait for hub + both nodes
+      - name: Wait for hub + 3 nodes
         run: |
           for i in $(seq 1 30); do
             if curl -sf http://localhost:4444/status | grep -q '"ready": *true' \
-               && [ "$(curl -sf http://localhost:4444/status | grep -o '"availability": *"UP"' | wc -l)" -ge 2 ]; then
+               && [ "$(curl -sf http://localhost:4444/status | grep -o '"availability": *"UP"' | wc -l)" -ge 3 ]; then
               echo "grid ready"; exit 0
             fi
             sleep 2

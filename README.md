@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/LSaiko/cross-browser-grid/actions/workflows/test.yml/badge.svg)](https://github.com/LSaiko/cross-browser-grid/actions/workflows/test.yml)
 
-Runs one pytest suite against Chrome **and** Firefox through a Selenium Grid
+Runs one pytest suite against Chrome, Firefox **and** Edge through a Selenium Grid
 started with Docker Compose. Target app: https://www.saucedemo.com.
 
 ## Run it
@@ -10,9 +10,9 @@ started with Docker Compose. Target app: https://www.saucedemo.com.
 ```bash
 docker compose up -d
 pip install -r requirements.txt
-pytest -v                 # both browsers, 10 tests
+pytest -v                 # all three browsers, 15 tests
 BROWSERS=chrome pytest    # one browser
-pytest -n 4               # parallel (pytest-xdist) — each node has 2 slots
+pytest -n 6               # parallel (pytest-xdist) — each node has 2 slots
 docker compose down -v
 ```
 
@@ -21,11 +21,11 @@ Grid console: http://localhost:4444/ui · status JSON: http://localhost:4444/sta
 ## Layout
 
 ```
-docker-compose.yml     hub + chrome node + firefox node
-conftest.py            `driver` fixture, params=["chrome","firefox"], webdriver.Remote → hub
+docker-compose.yml     hub + chrome, firefox, edge nodes
+conftest.py            `driver` fixture, params=["chrome","firefox","edge"], webdriver.Remote → hub
 pages/                 POM (login, inventory, cart, checkout) reused from saucedemo-automation
 tests/test_cross_browser.py   5 flows: login, bad login, item navigation, sort <select>, checkout form
-.github/workflows/test.yml    compose up → wait for hub + 2 nodes → pytest → compose down
+.github/workflows/test.yml    compose up → wait for hub + 3 nodes → pytest → compose down
 ```
 
 ## Grid architecture
@@ -33,9 +33,9 @@ tests/test_cross_browser.py   5 flows: login, bad login, item navigation, sort <
 ```
  pytest ──HTTP (W3C WebDriver)──▶ selenium-hub :4444
                                     │ event bus :4442/:4443
-                     ┌──────────────┴──────────────┐
-             node-chrome (2 slots)         node-firefox (2 slots)
-             chromedriver + Chrome         geckodriver + Firefox
+            ┌─────────────────────┼─────────────────────┐
+   node-chrome (2 slots)  node-firefox (2 slots)  node-edge (2 slots)
+   chromedriver + Chrome  geckodriver + Firefox   msedgedriver + Edge
 ```
 
 * **Hub** = router + distributor + session map. It receives `POST /session`,
@@ -82,6 +82,7 @@ Per-test `setup` (session create + first `get`), same machine, serial:
 | browser | setup (typical) | setup (worst seen) |
 |---------|-----------------|--------------------|
 | chrome  | 0.3 – 1.4 s     | 1.4 s              |
+| edge    | 0.3 – 1.5 s     | 1.5 s              |
 | firefox | 2.0 – 4.2 s     | 6.7 s              |
 
 Not a failure, but it dominates wall time: firefox contributes ~60% of a
@@ -90,10 +91,17 @@ serial run. Session-scoped drivers would hide it but leak state between tests.
 ### 3. Firefox first-page latency spike (flaky timing, not flaky result)
 
 `test_login_success[firefox]` took 22.4 s on one run vs 2.5 s on the others
-(same test, same Grid, nothing else running). Chrome never exceeded 2 s. All
+(same test, same Grid, nothing else running). Chrome and Edge never exceeded 2 s. All
 runs still passed because the page objects use explicit 15 s waits per
 element rather than sleeps. If this shows up in CI as a timeout, raise
 `BasePage` timeout for firefox only — don't add sleeps.
+
+### Edge behaves as Chrome
+
+Added after the Chrome/Firefox pass. Edge (Chromium 131, msedgedriver) passed
+5/5 first time with no locator changes, including the `<a href="#"><div>`
+click that Firefox rejects — the finding #1 fix is a geckodriver-vs-Chromium
+split, not a per-browser one.
 
 ### Not different (checked)
 
@@ -108,3 +116,4 @@ element rather than sleeps. If this shows up in CI as a timeout, raise
 * `BROWSERS=chrome pytest` → 5 passed (13 s).
 * `pytest` → 9 passed / 1 failed (finding #1) → fixed → 10 passed, 3 further
   full runs green (28 s, 39 s, 59 s serial; 17 s with `-n 4`).
+* Edge node added → `BROWSERS=edge pytest` 5 passed (17 s) → 15 passed in 35 s with `-n 6`.

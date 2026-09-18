@@ -8,11 +8,12 @@ HUB_URL = os.environ.get("HUB_URL", "http://localhost:4444/wd/hub")
 OPTIONS = {
     "chrome": webdriver.ChromeOptions,
     "firefox": webdriver.FirefoxOptions,
+    "edge": webdriver.EdgeOptions,
 }
 
 
 # ponytail: starts Chrome-only via BROWSERS env for step-by-step verification; default is both
-@pytest.fixture(params=os.environ.get("BROWSERS", "chrome,firefox").split(","))
+@pytest.fixture(params=os.environ.get("BROWSERS", "chrome,firefox,edge").split(","))
 def driver(request):
     opts = OPTIONS[request.param]()
     opts.add_argument("--window-size=1280,900")
