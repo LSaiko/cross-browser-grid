@@ -126,3 +126,7 @@ split, not a per-browser one.
 * `pytest` → 9 passed / 1 failed (finding #1) → fixed → 10 passed, 3 further
   full runs green (28 s, 39 s, 59 s serial; 17 s with `-n 4`).
 * Edge node added → `BROWSERS=edge pytest` 5 passed (17 s) → 15 passed in 35 s with `-n 6`.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
