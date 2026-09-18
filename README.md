@@ -31,6 +31,9 @@ tests/test_cross_browser.py   5 flows: login, bad login, item navigation, sort <
 .github/workflows/test.yml    compose up → wait for hub + 3 nodes → pytest → compose down
 ```
 
+On failure the fixture saves `screenshots/<test>[<browser>].png`; CI uploads
+that folder as an artifact when the job fails.
+
 ## Grid architecture
 
 ```
