@@ -31,8 +31,9 @@ tests/test_cross_browser.py   5 flows: login, bad login, item navigation, sort <
 .github/workflows/test.yml    compose up → wait for hub + 3 nodes → pytest → compose down
 ```
 
-On failure the fixture saves `screenshots/<test>[<browser>].png`; CI uploads
-that folder as an artifact when the job fails. Every CI run also uploads a
+On failure a `pytest_runtest_makereport` hook saves `screenshots/<test>[<browser>].png`
+and embeds the same image in the HTML report; CI uploads the folder as an
+artifact when the job fails. Every CI run also uploads a
 `reports` artifact with `report.html` (pytest-html, self-contained) and
 `report.xml` (JUnit).
 
