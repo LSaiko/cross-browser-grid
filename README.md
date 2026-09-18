@@ -32,7 +32,9 @@ tests/test_cross_browser.py   5 flows: login, bad login, item navigation, sort <
 ```
 
 On failure the fixture saves `screenshots/<test>[<browser>].png`; CI uploads
-that folder as an artifact when the job fails.
+that folder as an artifact when the job fails. Every CI run also uploads a
+`reports` artifact with `report.html` (pytest-html, self-contained) and
+`report.xml` (JUnit).
 
 ## Grid architecture
 
