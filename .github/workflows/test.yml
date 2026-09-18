@@ -1,0 +1,32 @@
+name: cross-browser-grid
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  grid:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - run: docker compose up -d
+      - name: Wait for hub + both nodes
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:4444/status | grep -q '"ready": *true' \
+               && [ "$(curl -sf http://localhost:4444/status | grep -o '"nodeId"' | wc -l)" -ge 2 ]; then
+              echo "grid ready"; exit 0
+            fi
+            sleep 2
+          done
+          echo "grid not ready"; curl -s http://localhost:4444/status; exit 1
+      - run: pytest -v --junitxml=report.xml
+      - if: always()
+        run: docker compose down -v
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit
+          path: report.xml
