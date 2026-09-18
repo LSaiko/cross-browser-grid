@@ -16,7 +16,7 @@ jobs:
         run: |
           for i in $(seq 1 30); do
             if curl -sf http://localhost:4444/status | grep -q '"ready": *true' \
-               && [ "$(curl -sf http://localhost:4444/status | grep -o '"nodeId"' | wc -l)" -ge 2 ]; then
+               && [ "$(curl -sf http://localhost:4444/status | grep -o '"availability": *"UP"' | wc -l)" -ge 2 ]; then
               echo "grid ready"; exit 0
             fi
             sleep 2
